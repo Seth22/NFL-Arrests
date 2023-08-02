@@ -70,19 +70,19 @@ color_scheme <- c('#a0bfd9','#ffffff', '#d88359', '#d65440', '#c62c34')
 color_scheme2 <- c('#76b8de', '#a0bfd9', '#ffffff', '#d88359', '#d65440', '#c62c34')
 color_scheme3 <- c( '#a0bfd9','#d88359', '#d65440', '#c62c34')
 
-NFLPlayersArrestedTable <- reactable(NFLPlayersArrested,columns = list(Times_Arrested = colDef(name = "Times Arrested",cell = color_tiles(NFLPlayersArrested, colors = color_scheme), width = 130)),theme = cosmo(),bordered = TRUE, highlight = TRUE)
+NFLPlayersArrestedTable <- reactable(NFLPlayersArrested,columns = list(Times_Arrested = colDef(name = "Times Arrested",cell = color_tiles(NFLPlayersArrested, colors = color_scheme), width = 130)),theme = cosmo(),bordered = TRUE, highlight = TRUE,static = TRUE)
 
 NFLPlayersArrestedTable %>% 
   add_title(title = "NFL Players Arrested") %>% 
   add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20) 
   
-NFLTeamsArrestedTable <-reactable(NFLTeamsArrested,columns = list(Times_players_on_team_arrested = colDef(name = "Players Arrested",cell = color_tiles(NFLTeamsArrested, colors = color_scheme2), width = 120)),theme = cosmo(),bordered = TRUE,highlight = TRUE)
+NFLTeamsArrestedTable <-reactable(NFLTeamsArrested,columns = list(Times_players_on_team_arrested = colDef(name = "Players Arrested",cell = color_tiles(NFLTeamsArrested, colors = color_scheme2), width = 120)),theme = cosmo(),bordered = TRUE,highlight = TRUE, static = TRUE)
 
 NFLTeamsArrestedTable %>% 
   add_title(title = "NFL Players Arrested on each Team") %>% 
   add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20)
 
-NFLCrimesArrested <- reactable(NFLCrimes,columns = list(Reason_arrested = colDef(name = "Players Arrested", cell = color_tiles(NFLCrimes, colors = color_scheme3),width = 130)),theme = cosmo(),bordered = TRUE, highlight = TRUE)
+NFLCrimesArrested <- reactable(NFLCrimes,columns = list(Reason_arrested = colDef(name = "Players Arrested", cell = color_tiles(NFLCrimes, colors = color_scheme3),width = 130)),theme = cosmo(),bordered = TRUE, highlight = TRUE, static = TRUE)
 
 NFLCrimesArrested %>% 
   add_title(title = "Crimes NFL players were Arrested") %>% 
