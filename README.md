@@ -1,5 +1,6 @@
 # NFL-Arrests
-An analysis of a dataset based on when NFL players have been arrested and under what circumstances
+- An analysis of a dataset based on when NFL players have been arrested and under what circumstances
+- View project here(knitted rendered HTML file): https://htmlpreview.github.io/?https://github.com/Seth22/NFL-Arrests/blob/main/NFLArrests.html
 
 ## Future Plans
 1. Further optimizing data analysis
