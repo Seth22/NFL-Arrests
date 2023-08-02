@@ -1,0 +1,154 @@
+---
+title: "NFLArrests"
+output: html_document
+date: "2023-08-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Analysis of NFL players arrested using R
+### A special thanks to USATODAY and Brent Schrotenboer for providing me with the NFL arrest dataset all credit for the data goes to them
+
+## Loading libraries to use
+
+```{r}
+library(ggplot2)#library for graphing functions
+library(dplyr) #library for data wrangling
+library(readxl) #library for reading in excel files
+library(lubridate) #library to work with date formats
+library(forcats) #to factor variables -- used to put bar graphs in descending order
+library(tidyr) #tidyr library (use Unite function) 
+library(reactable) #library for creating tables
+library(reactablefmtr) #library for creating tables
+```
+
+## Data engineering
+
+```{r}
+NFLarrests <- read_excel("/home/seth/RCode/Nfl/NFL_arrests_updated_2022.xlsx") %>% #reads in excel file into R 
+  rename(FirstName = `First name`, LastName = `Last name`) %>% #rename columns for easier use
+  mutate(year = year(Date), month = month(Date, label = TRUE), day = wday(Date, abbr = FALSE, label = TRUE)) %>% #adds columns for year,month and day 
+  unite("Player",FirstName:LastName)  #adds first and last name to one columns
+
+NFLarrests$Player <- gsub("_"," ",NFLarrests$Player) #replaces underscore in players name with a space
+
+##head and glimpse hidden for dataset compliance/privacy 
+#head(NFLarrests) #shows first 6 rows
+#glimpse(NFLarrests) #basic information about columns 
+
+NFLcharged <- NFLarrests %>%  #new dataset with only NFL players charged 
+  filter(Case == "Charged") #keeps only cases where player is charged 
+```
+
+## Tables based on NFL players that have been arrested
+
+```{r}
+NFLPlayersArrested <- NFLarrests %>% 
+  group_by(Player) %>% #groups data by player
+  summarize(Times_Arrested = n()) %>% #creates table of number of times each player arrested
+  arrange(desc(Times_Arrested))   #puts table in descending order
+
+NFLTeamsArrested <-NFLarrests %>% 
+  group_by(Team) %>% #groups data by team
+  summarize(Times_players_on_team_arrested = n()) %>% #creates table of number of times players on a certain team are arrested 
+  arrange(desc(Times_players_on_team_arrested))   #arranges table in descending order
+
+NFLCrimes <- NFLarrests %>% 
+  group_by(Category) %>% #groups data by crime
+  summarize(Reason_arrested = n()) %>% #creates table of number of times NFL players arrested for each crime
+  arrange(desc(Reason_arrested)) %>%  #puts table in descending order
+  rename(`Crime` = Category) #rename for aesthetics 
+```
+
+## Formatting output of tables above 
+
+```{r}
+#colors schemes for color tiles 
+color_scheme <- c('#a0bfd9','#ffffff', '#d88359', '#d65440', '#c62c34')
+color_scheme2 <- c('#76b8de', '#a0bfd9', '#ffffff', '#d88359', '#d65440', '#c62c34')
+color_scheme3 <- c( '#a0bfd9','#d88359', '#d65440', '#c62c34')
+
+NFLPlayersArrestedTable <- reactable(NFLPlayersArrested,columns = list(Times_Arrested = colDef(name = "Times Arrested",cell = color_tiles(NFLPlayersArrested, colors = color_scheme), width = 130)),theme = cosmo(),bordered = TRUE, highlight = TRUE)
+
+NFLPlayersArrestedTable %>% 
+  add_title(title = "NFL Players Arrested") %>% 
+  add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20) 
+  
+NFLTeamsArrestedTable <-reactable(NFLTeamsArrested,columns = list(Times_players_on_team_arrested = colDef(name = "Players Arrested",cell = color_tiles(NFLTeamsArrested, colors = color_scheme2), width = 120)),theme = cosmo(),bordered = TRUE,highlight = TRUE)
+
+NFLTeamsArrestedTable %>% 
+  add_title(title = "NFL Players Arrested on each Team") %>% 
+  add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20)
+
+NFLCrimesArrested <- reactable(NFLCrimes,columns = list(Reason_arrested = colDef(name = "Players Arrested", cell = color_tiles(NFLCrimes, colors = color_scheme3),width = 130)),theme = cosmo(),bordered = TRUE, highlight = TRUE)
+
+NFLCrimesArrested %>% 
+  add_title(title = "Crimes NFL players were Arrested") %>% 
+  add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20)
+```
+
+## Tables same as above but based only when players got charged
+
+```{r}
+NFLPlayersCharged <- NFLcharged %>% 
+  group_by(Player) %>% #groups data by player
+  summarize(Times_Charged = n()) %>% #creates table of number of times each player arrested
+  arrange(desc(Times_Charged))  #puts table in descending order
+
+NFLteamsCharged <- NFLcharged %>% 
+  group_by(Team) %>% #groups data by team
+  summarize(Times_players_on_team_Charged = n()) %>% #creates table of number of times players on a certain team are arrested 
+  arrange(desc(Times_players_on_team_Charged))  #arranges table in descending order
+
+NFLcrimeCharged <- NFLcharged %>% 
+  group_by(Category) %>% #groups data by crime
+  summarize(Reason_Charged = n()) %>% #creates table of number of times NFL players arrested for each crime
+  arrange(desc(Reason_Charged)) %>%  #puts table in descending order
+  rename(Crime = Category) #rename for aesthetics 
+```
+
+## Nice formatting of tables above 
+```{r}
+color_scheme4 <- c('#d88359', '#d65440', '#c62c34')
+
+NFLPlayersChargedTable <- reactable(NFLPlayersCharged, columns = list(Times_Charged = colDef(name = "Times Charged", cell = color_tiles(NFLPlayersCharged,color_scheme4),width = 120)),theme = cosmo(),bordered = TRUE,highlight = TRUE)
+
+NFLPlayersChargedTable %>% 
+  add_title(title = "NFL Players Charged") %>% 
+  add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20)
+
+NFLteamsChargedTable <- reactable(NFLteamsCharged, columns = list(Times_players_on_team_Charged = colDef(name = "Players Arrested", width = 120,cell = color_tiles(NFLteamsCharged,colors = color_scheme3))),theme = cosmo(),bordered = TRUE,highlight = TRUE)
+
+NFLteamsChargedTable %>% 
+  add_title(title = "NFL Players Charged on each Team") %>% 
+  add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20)
+
+NFLcrimeChargedTable <- reactable(NFLcrimeCharged,columns = list(Reason_Charged = colDef(name = "Crime", width = 120, cell = color_tiles(NFLcrimeCharged,colors = color_scheme4))),theme = cosmo(),bordered = TRUE,highlight = TRUE)
+
+NFLcrimeChargedTable  %>% 
+  add_title(title = "Crimes NFL players were Charged") %>% 
+  add_subtitle(subtitle = "Data from Brent Schrotenboer and USAToday", font_size = 20)
+```
+
+## Graphs :D
+
+```{r}
+ggplot(data = NFLarrests, aes(x = fct_infreq(Position))) + geom_bar(color = "black", fill = "purple") + theme_linedraw() + labs(title = "NFL players arrested based on each postion they play", subtitle = "Data from Brent Schrotenboer and USAToday", caption = "Created by Seth Holtzman :D", x = "Position", y = "Number Arrested")
+
+ggplot(data = NFLcharged, aes(x = fct_infreq(Position))) + geom_bar(color = "black", fill = "purple") + theme_linedraw() + labs(title = "NFL players charged based on each postion they play", subtitle = "Data from Brent Schrotenboer and USAToday", caption = "Created by Seth Holtzman :D", x = "Position", y = "Number Charged")
+
+ggplot(data = NFLarrests, aes(x = fct_infreq(Case))) + geom_bar(color = "black", fill = "purple") + theme_linedraw() + labs(title = "Case status of NFL players arrested", subtitle = "Data from Brent Schrotenboer and USAToday", caption = "Created by Seth Holtzman :D", x = "Case status", y = NULL)
+
+```
+
+## Graphs based on date
+
+```{r}
+ggplot(data = NFLarrests, aes(x = year)) + geom_bar(color = "black", fill = "purple") + theme_linedraw() + labs(title = "Number of NFL players arrested each year", subtitle = "Data from Brent Schrotenboer and USAToday", caption = "Created by Seth Holtzman :D", x = "Year", y = NULL)
+
+ggplot(data = NFLarrests, aes(x = month)) + geom_bar(color = "black", fill = "purple") + theme_linedraw() + labs(title = "Number of NFL players arrested each Month", subtitle = "Data from Brent Schrotenboer and USAToday", caption = "Created by Seth Holtzman :D", x = "Month", y = NULL)
+
+ggplot(data = NFLarrests, aes(x = day)) + geom_bar(color = "black", fill = "purple") + theme_linedraw() + labs(title = "Number of NFL players arrested on each day of the week", subtitle = "Data from Brent Schrotenboer and USAToday", caption = "Created by Seth Holtzman :D", x = "Day", y = NULL)
+```
